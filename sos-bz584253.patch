@@ -1,0 +1,47 @@
+diff -up sos-2.2/Makefile.bz585942 sos-2.2/Makefile
+--- sos-2.2/Makefile.bz585942	2010-07-29 11:41:52.260909433 -0400
++++ sos-2.2/Makefile	2010-07-29 11:41:56.277909635 -0400
+@@ -37,6 +37,7 @@ install:
+ 	install -m644 LICENSE README TODO $(DESTDIR)/usr/share/$(NAME)/.
+ 	install -m644 $(NAME).conf $(DESTDIR)/etc/$(NAME).conf
+ 	install -m644 gpgkeys/rhsupport.pub $(DESTDIR)/usr/share/$(NAME)/.
++	sed 's/@SOSVERSION@/$(VERSION)/g'<sos/__init__.py.in >sos/__init__.py
+ 	for d in $(SUBDIRS); do make DESTDIR=`cd $(DESTDIR); pwd` -C $$d install; [ $$? = 0 ] || exit 1; done
+ 
+ $(NAME)-$(VERSION).tar.gz: clean gpgkey
+
+diff -up sos-2.2/sos/sosreport.py.bz584253 sos-2.2/sos/sosreport.py
+--- sos-2.2/sos/sosreport.py.bz584253	2010-07-29 11:43:53.718936059 -0400
++++ sos-2.2/sos/sosreport.py	2010-07-29 11:44:01.279936234 -0400
+@@ -46,8 +46,8 @@ from itertools import *
+ from collections import deque
+ 
+ from sos import _sos as _
++from sos import __version__
+ 
+-__version__ = 2.1
+ if os.path.isfile('/etc/fedora-release'):
+     __distro__ = 'Fedora'
+ else:
+@@ -655,8 +655,9 @@ No changes will be made to your system.
+                     raise
+                 else:
+                     error_log = open(logdir + "/sosreport-plugin-errors.txt", "a")
++                    etype, eval, etrace = sys.exc_info()
+                     traceback.print_exception(etype, eval, etrace, limit=2, file=sys.stdout)
+-                    error_log.write(traceback.format_exc)
++                    error_log.write(traceback.format_exc())
+                     error_log.close()
+ 
+             tmpcount += len(plug.diagnose_msgs)
+@@ -727,8 +728,9 @@ No changes will be made to your system.
+                 raise
+             else:
+                 error_log = open(logdir + "/sosreport-plugin-errors.txt", "a")
++                etype, eval, etrace = sys.exc_info()
+                 traceback.print_exception(etype, eval, etrace, limit=2, file=sys.stdout)
+-                error_log.write(traceback.format_exc)
++                error_log.write(traceback.format_exc())
+                 error_log.close()
+ 
+     print
